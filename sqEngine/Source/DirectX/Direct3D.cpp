@@ -146,29 +146,25 @@ bool Direct3D::Initialize(HWND hWnd, int width, int height)
 }
 
 //=========================================================
-// 2D描画
+// 四角形の2D描画
+// squares_	：四角形の頂点座標配列
 void Direct3D::SquareDraw2D(std::vector<VertexType2D>& squares_)
 {
-	VertexType2D squares[] = {
-		squares_[0],
-		squares_[1],
-		squares_[2],
-		squares_[3],
-	};
+	// 四角形のデータをコピーする
+	std::vector<VertexType2D> squares(squares_.begin(), squares_.end());
 
-	// 四角形用 頂点バッファ作成準備
+	 // 四角形用 頂点バッファ作成準備
 	D3D11_BUFFER_DESC vbDesc = {};
 	vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;	// デバイスにバインドするときの種類（頂点バッファ、インデックスバッファ、定数バッファなど）
-	vbDesc.ByteWidth = sizeof(squares);				// 作成するバッファのバイトサイズ
+	vbDesc.ByteWidth = static_cast<UINT>(sizeof(VertexType2D) * squares.size());	// 作成するバッファのバイトサイズ
 	vbDesc.MiscFlags = 0;							// その他のフラグ
 	vbDesc.StructureByteStride = 0;					// 構造化バッファの場合、その構造体のサイズ
 	vbDesc.Usage = D3D11_USAGE_DEFAULT;				// 作成するバッファの使用法
 	vbDesc.CPUAccessFlags = 0;
 
 	// デバイスに頂点バッファの作成を依頼する
-	ComPtr<ID3D11Buffer> vb;
-	D3D11_SUBRESOURCE_DATA initData = { &squares[0], sizeof(squares), 0 };	// 書き込むデータ
-	
+	D3D11_SUBRESOURCE_DATA initData = { squares.data(), vbDesc.ByteWidth, 0 };	 	// 書き込むデータ
+
 	// 頂点バッファの作成
 	mDevice->CreateBuffer(&vbDesc, &initData, &mVbSquare);
 
@@ -189,4 +185,62 @@ void Direct3D::SquareDraw2D(std::vector<VertexType2D>& squares_)
 
 	// デバイスコンテキストに描画を依頼する
 	mDeviceContext->Draw(4, 0);
+}
+
+//=========================================================
+// 2D描画
+// vertices_	：描画する頂点座標配列
+// vertexCount_	：描画する頂点の数
+bool Direct3D::Draw2D(std::vector<VertexType2D>& vertices_, int vertexCount_)
+{
+	// 描画する頂点の数が頂点データよりも多い場合は描画を停止する
+	if( vertexCount_ > vertices_.size() )
+	{
+		return false;
+	}
+
+	// 描画データをコピーする
+	std::vector<VertexType2D> vertices(vertices_.begin(), vertices_.end());
+
+	// 頂点バッファ作成準備
+	D3D11_BUFFER_DESC vbDesc = {};
+	vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;	// デバイスにバインドするときの種類（頂点バッファ、インデックスバッファ、定数バッファなど）
+	vbDesc.ByteWidth = static_cast<UINT>(sizeof(VertexType2D) * vertices.size());	// 作成するバッファのバイトサイズ
+	vbDesc.MiscFlags = 0;							// その他のフラグ
+	vbDesc.StructureByteStride = 0;					// 構造化バッファの場合、その構造体のサイズ
+	vbDesc.Usage = D3D11_USAGE_DEFAULT;				// 作成するバッファの使用法
+	vbDesc.CPUAccessFlags = 0;
+
+	// デバイスに頂点バッファの作成を依頼する
+	D3D11_SUBRESOURCE_DATA initData = { vertices.data(), vbDesc.ByteWidth, 0 };	 	// 書き込むデータ
+
+	// 頂点バッファの作成
+	mDevice->CreateBuffer(&vbDesc, &initData, &mVbSquare);
+
+	// 頂点バッファを描画で使えるようにセットする
+	UINT stride = sizeof(VertexType2D);
+	UINT offset = 0;
+	mDeviceContext->IASetVertexBuffers(0, 1, mVbSquare.GetAddressOf(), &stride, &offset);
+
+	// プリミティブ・トロポジーをセット
+	mDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	// 2D用頂点シェーダーセット
+	mDeviceContext->VSSetShader(mSpriteVS.Get(), 0, 0);
+	// 2D用ピクセルシェーダーセット
+	mDeviceContext->PSSetShader(mSpritePS.Get(), 0, 0);
+	// 入力レイアウトセット
+	mDeviceContext->IASetInputLayout(mSpriteInputLayout.Get());
+
+	// デバイスコンテキストに描画を依頼する
+	mDeviceContext->Draw(vertexCount_, 0);
+
+	return true;
+}
+
+
+//=========================================================
+// 2D座標変換
+void Transform2D()
+{
 }

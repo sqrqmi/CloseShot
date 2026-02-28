@@ -20,7 +20,7 @@ void GameSystem::Update()
 	float color[4] = { 0.2f, 0.2f, 1.0f, 1.0f };
 	D3D.mDeviceContext->ClearRenderTargetView(D3D.mBackBufferView.Get(), color);
 
-	// 三角形の描画
+	// 四角形の描画
 	{
 		std::vector<VertexType2D> squares =
 		{ 
@@ -31,7 +31,7 @@ void GameSystem::Update()
 		};
 
 		// 2D描画
-		D3D.SquareDraw2D(squares);
+		D3D.Draw2D(squares, squares.size());
 	}
 
 	// バックバッファの内容を画面に表示
