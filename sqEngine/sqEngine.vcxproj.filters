@@ -73,4 +73,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="プロジェクト規則.txt" />
+  </ItemGroup>
 </Project>

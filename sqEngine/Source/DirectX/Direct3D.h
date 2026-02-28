@@ -40,9 +40,19 @@ public:
 	ComPtr<ID3D11Buffer>		mVbSquare;				// 四角形用頂点バッファ
 
 	//=========================================================
-	// 2D描画
+	// 四角形の2D描画
 	// squares_	：四角形の頂点座標配列
-	void SquareDraw2D(std::vector<VertexType2D>& squares_); 
+	void SquareDraw2D(std::vector<VertexType2D>& squares_);
+
+	//=========================================================
+	// 2D描画
+	// vertices_	：描画する頂点座標配列
+	// vertexCount_	：描画する頂点の数
+	bool Draw2D(std::vector<VertexType2D>& vertices_, int vertexCount_);
+
+	//=========================================================
+	// 2D座標変換
+	void Transform2D();
 
 
 // シングルトンパターン
