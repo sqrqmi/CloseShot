@@ -51,10 +51,25 @@ public:
 	bool Draw2D(std::vector<VertexType2D>& vertices_, int vertexCount_);
 
 	//=========================================================
-	// 2D座標変換
+	// 2D座標移動変換
 	// vertices_	：変換する頂点座標配列
 	// offset_		：頂点座標の移動量
 	void Transform2D(std::vector<VertexType2D>& vertices_, const DirectX::XMFLOAT2& offset_);
+
+	//=========================================================
+	// 2D座標回転変換
+	// vertices_	：変換する頂点座標配列
+	// angle_		：頂点座標の回転量
+	// center_		：回転の中心座標
+	void Rotation2D(std::vector<VertexType2D>& vertices_, float angle_, const DirectX::XMFLOAT2& center_);
+
+	//=========================================================
+	// 2D座標拡縮変換
+	// vertices_	：変換する頂点座標配列
+	// scale_		：頂点座標の拡縮量
+	// center_		：拡縮の中心座標
+	void Scale2D(std::vector<VertexType2D>& vertices_, const DirectX::XMFLOAT2& scale_, const DirectX::XMFLOAT2& center_);
+
 
 
 // シングルトンパターン

@@ -29,8 +29,14 @@ void GameSystem::Update()
 
 	// lŠpŒ`‚Ì•`‰æ
 	{
-		// 2DÀ•W•ÏŠ·
-		D3D.Transform2D(Squares, DirectX::XMFLOAT2(MoveOffset, MoveOffset));
+		// 2DÀ•WŠgk•ÏŠ·
+		// D3D.Scale2D(Squares, DirectX::XMFLOAT2(0.99f, 0.99f), DirectX::XMFLOAT2(1.f, 0.f));
+
+		// 2DÀ•W‰ñ“]•ÏŠ·
+		D3D.Rotation2D(Squares, DirectX::XMConvertToRadians(1.f), DirectX::XMFLOAT2(0.01f, 0.01f));
+
+		// 2DÀ•WˆÚ“®•ÏŠ·
+		// D3D.Transform2D(Squares, DirectX::XMFLOAT2(MoveOffset, MoveOffset));
 
 		// 2D•`‰æ
 		D3D.Draw2D(Squares, Squares.size());
