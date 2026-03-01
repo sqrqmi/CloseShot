@@ -52,7 +52,9 @@ public:
 
 	//=========================================================
 	// 2D座標変換
-	void Transform2D();
+	// vertices_	：変換する頂点座標配列
+	// offset_		：頂点座標の移動量
+	void Transform2D(std::vector<VertexType2D>& vertices_, const DirectX::XMFLOAT2& offset_);
 
 
 // シングルトンパターン

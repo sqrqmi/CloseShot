@@ -241,6 +241,13 @@ bool Direct3D::Draw2D(std::vector<VertexType2D>& vertices_, int vertexCount_)
 
 //=========================================================
 // 2D座標変換
-void Transform2D()
+// vertices_	：変換する頂点座標配列
+// offset_		：頂点座標の移動量
+void Direct3D::Transform2D(std::vector<VertexType2D>& vertices_, const DirectX::XMFLOAT2& offset_)
 {
+	for ( auto& v : vertices_ )
+	{
+		v.Pos.x += offset_.x;
+		v.Pos.y += offset_.y;
+	}
 }

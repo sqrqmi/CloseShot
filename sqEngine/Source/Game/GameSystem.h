@@ -27,6 +27,12 @@ private:
 	// コンストラクタはprivateにする
 	GameSystem() {};
 
+	// 頂点座標配列
+	std::vector<VertexType2D> Squares;
+
+	// 移動量
+	float MoveOffset = 0.01f;
+
 public:
 
 	// インスタンス作成
