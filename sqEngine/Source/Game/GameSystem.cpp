@@ -10,6 +10,13 @@
 // ゲームの初期化処理
 void GameSystem::Initialize()
 {
+	Squares =
+	{
+		{ DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f) },	// 左下
+		{ DirectX::XMFLOAT3(-0.5f,  0.5f, 0.0f) },	// 左上
+		{ DirectX::XMFLOAT3( 0.5f, -0.5f, 0.0f) },	// 右下
+		{ DirectX::XMFLOAT3( 0.5f,  0.5f, 0.0f) },	// 右上
+	};
 }
 
 //=========================================================
@@ -22,16 +29,17 @@ void GameSystem::Update()
 
 	// 四角形の描画
 	{
-		std::vector<VertexType2D> squares =
-		{ 
-			{ DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f) },	// 左下
-			{ DirectX::XMFLOAT3(-0.5f,  0.5f, 0.0f) },	// 左上
-			{ DirectX::XMFLOAT3( 0.5f, -0.5f, 0.0f) },	// 右下
-			{ DirectX::XMFLOAT3( 0.5f,  0.5f, 0.0f) },	// 右上
-		};
+		// 2D座標拡縮変換
+		// D3D.Scale2D(Squares, DirectX::XMFLOAT2(0.99f, 0.99f), DirectX::XMFLOAT2(1.f, 0.f));
+
+		// 2D座標回転変換
+		D3D.Rotation2D(Squares, DirectX::XMConvertToRadians(1.f), DirectX::XMFLOAT2(0.01f, 0.01f));
+
+		// 2D座標移動変換
+		// D3D.Transform2D(Squares, DirectX::XMFLOAT2(MoveOffset, MoveOffset));
 
 		// 2D描画
-		D3D.Draw2D(squares, squares.size());
+		D3D.Draw2D(Squares, Squares.size());
 	}
 
 	// バックバッファの内容を画面に表示

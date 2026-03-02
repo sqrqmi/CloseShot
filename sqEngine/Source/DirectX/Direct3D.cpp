@@ -238,9 +238,64 @@ bool Direct3D::Draw2D(std::vector<VertexType2D>& vertices_, int vertexCount_)
 	return true;
 }
 
+//=========================================================
+// 2D座標移動変換
+// vertices_	：変換する頂点座標配列
+// offset_		：頂点座標の移動量
+void Direct3D::Transform2D(std::vector<VertexType2D>& vertices_, const DirectX::XMFLOAT2& offset_)
+{
+	for ( auto& v : vertices_ )
+	{
+		v.Pos.x += offset_.x;
+		v.Pos.y += offset_.y;
+	}
+}
 
 //=========================================================
-// 2D座標変換
-void Transform2D()
+// 2D座標回転変換
+// vertices_	：変換する頂点座標配列
+// angle_		：頂点座標の回転量
+// center_		：回転の中心座標
+void Direct3D::Rotation2D(std::vector<VertexType2D>& vertices_, float angle_, const DirectX::XMFLOAT2& center_)
 {
+	float cos = std::cosf(angle_);
+	float sin = std::sinf(angle_);
+
+	for (auto& v : vertices_)
+	{
+		// 頂点座標を回転の中心に移動
+		float x = v.Pos.x - center_.x;
+		float y = v.Pos.y - center_.y;
+
+		// 回転
+		float rotationX = x * cos - y * sin;
+		float rotationY = x * sin + y * cos;
+
+		// 回転後の座標を保存
+		v.Pos.x = rotationX;
+		v.Pos.y = rotationY;
+	}
+}
+
+//=========================================================
+// 2D座標拡縮変換
+// vertices_	：変換する頂点座標配列
+// scale_		：頂点座標の拡縮量
+// center_		：拡縮の中心座標
+void Direct3D::Scale2D(std::vector<VertexType2D>& vertices_, const DirectX::XMFLOAT2& scale_, const DirectX::XMFLOAT2& center_)
+{
+	for ( auto& v : vertices_ )
+	{
+		// 頂点座標を拡縮の中心に移動
+		float x = v.Pos.x - center_.x;
+		float y = v.Pos.y - center_.y;
+
+		// スケール
+		x *= scale_.x;
+		y *= scale_.y;
+
+		// 元の位置に戻す
+		v.Pos.x = x + center_.x;
+		v.Pos.y = y + center_.y;
+	}
 }
