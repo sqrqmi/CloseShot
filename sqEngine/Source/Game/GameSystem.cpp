@@ -10,13 +10,18 @@
 // ゲームの初期化処理
 void GameSystem::Initialize()
 {
-	Squares =
+	const float ALPHA = 0.5f;
+
+	Triangle =
 	{
-		{ DirectX::XMFLOAT3(-0.5f, -0.5f, 0.0f) },	// 左下
-		{ DirectX::XMFLOAT3(-0.5f,  0.5f, 0.0f) },	// 左上
-		{ DirectX::XMFLOAT3( 0.5f, -0.5f, 0.0f) },	// 右下
-		{ DirectX::XMFLOAT3( 0.5f,  0.5f, 0.0f) },	// 右上
+		{ DirectX::XMFLOAT3(  0.0f,  sqrtf(3) / 3.f, 0.0f), DirectX::XMFLOAT4( 1.f, 0.f, 0.f, ALPHA )},	// 上
+		{ DirectX::XMFLOAT3(  0.5f, -sqrtf(3) / 6.f, 0.0f), DirectX::XMFLOAT4( 0.f, 1.f, 0.f, ALPHA) },	// 左下
+		{ DirectX::XMFLOAT3( -0.5f, -sqrtf(3) / 6.f, 0.0f), DirectX::XMFLOAT4( 0.f, 0.f, 1.f, ALPHA) },	// 右下
 	};
+	
+	// D3D.Transform2D(Triangle, DirectX::XMFLOAT2(0.5f, MoveOffset));
+	// D3D.Scale2D(Triangle, DirectX::XMFLOAT2(2.f, 2.f), DirectX::XMFLOAT2(0.f, 0.f));
+	// D3D.Rotation2D(Triangle, DirectX::XMConvertToRadians(90.f), DirectX::XMFLOAT2(0.f, 0.f));
 }
 
 //=========================================================
@@ -30,16 +35,16 @@ void GameSystem::Update()
 	// 四角形の描画
 	{
 		// 2D座標拡縮変換
-		// D3D.Scale2D(Squares, DirectX::XMFLOAT2(0.99f, 0.99f), DirectX::XMFLOAT2(1.f, 0.f));
+		// D3D.Scale2D(Triangle, DirectX::XMFLOAT2(0.99f, 0.99f), DirectX::XMFLOAT2(1.f, 0.f));
 
 		// 2D座標回転変換
-		D3D.Rotation2D(Squares, DirectX::XMConvertToRadians(1.f), DirectX::XMFLOAT2(0.01f, 0.01f));
+		// D3D.Rotation2D(Triangle, DirectX::XMConvertToRadians(90.f), DirectX::XMFLOAT2(0.f, 0.f));
 
 		// 2D座標移動変換
-		// D3D.Transform2D(Squares, DirectX::XMFLOAT2(MoveOffset, MoveOffset));
+		// D3D.Transform2D(Triangle, DirectX::XMFLOAT2(MoveOffset, MoveOffset));
 
 		// 2D描画
-		D3D.Draw2D(Squares, Squares.size());
+		D3D.Draw2D(Triangle, Triangle.size());
 	}
 
 	// バックバッファの内容を画面に表示

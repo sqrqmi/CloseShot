@@ -22,7 +22,7 @@ bool Direct3D::Initialize(HWND hWnd, int width, int height)
 
 #ifdef _DEBUG
 	// DEBUGビルド時はDirect3Dのデバッグを有効にする（重くなるが、細かいエラーまで見ることができる）
-	creationFlags != D3D11_CREATE_DEVICE_DEBUG;
+	creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
 	D3D_FEATURE_LEVEL featureLevels[] =
@@ -133,7 +133,8 @@ bool Direct3D::Initialize(HWND hWnd, int width, int height)
 
 	// １頂点の詳細な情報
 	std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,		0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,		0,	0,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0,	12,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 	// 頂点インプットレイアウト作成
@@ -141,6 +142,29 @@ bool Direct3D::Initialize(HWND hWnd, int width, int height)
 	{
 		return false;
 	}
+
+	//=========================================================
+	// ブレンドステート作成（アルファブレンド / 半透明描画を有効にする）
+	D3D11_BLEND_DESC blendDesc = {};
+	blendDesc.AlphaToCoverageEnable					= FALSE;						// マルチサンプリング用の特殊アルファ処理の有効化
+	blendDesc.IndependentBlendEnable				= FALSE;						// 複数のレンダーターゲットで別々のブレンド設定をするかどうか
+	blendDesc.RenderTarget[0].BlendEnable			= TRUE;							// ブレンドの有効化
+	blendDesc.RenderTarget[0].SrcBlend				= D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend				= D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp				= D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha			= D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha		= D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOpAlpha			= D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;	// RGBAの全てに書き込む（Rだけとかも可能）
+
+	if (FAILED(mDevice->CreateBlendState(&blendDesc, &mAlphaBlendState)))
+	{
+		return false;
+	}
+
+	// デフォルトでアルファブレンドを有効にする
+	float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
+	mDeviceContext->OMSetBlendState(mAlphaBlendState.Get(), blendFactor, 0xffffffff);
 
 	return true;
 }
@@ -298,4 +322,24 @@ void Direct3D::Scale2D(std::vector<VertexType2D>& vertices_, const DirectX::XMFL
 		v.Pos.x = x + center_.x;
 		v.Pos.y = y + center_.y;
 	}
+}
+
+//=========================================================
+// ブレンド制御
+// 有効化すると頂点カラーのアルファ値に基づいて半透明描画される
+void Direct3D::EnableAlphaBlend()
+{
+	// ブレンドステートが無効な場合は処理を行わない
+	if (mAlphaBlendState)
+	{
+		mDeviceContext->OMSetBlendState(mAlphaBlendState.Get(), nullptr, 0xffffffff);
+	}
+}
+
+//=========================================================
+// ブレンドを無効にする
+void Direct3D::DisableAlphaBlend()
+{
+	ID3D11BlendState* nullBlendState = nullptr;
+	mDeviceContext->OMSetBlendState(nullBlendState, nullptr, 0xffffffff);
 }

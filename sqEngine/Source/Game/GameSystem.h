@@ -28,7 +28,7 @@ private:
 	GameSystem() {};
 
 	// ’¸“_À•W”z—ñ
-	std::vector<VertexType2D> Squares;
+	std::vector<VertexType2D> Triangle;
 
 	// ˆÚ“®—Ê
 	float MoveOffset = 0.01f;
