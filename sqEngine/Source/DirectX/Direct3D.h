@@ -7,7 +7,8 @@ class Texture;
 // 2D用頂点構造体
 struct VertexType2D
 {
-	DirectX::XMFLOAT3 Pos;	// 座標
+	DirectX::XMFLOAT3 Pos;		// 座標
+	DirectX::XMFLOAT4 Color;	// 色
 };
 
 //================================================
@@ -39,6 +40,8 @@ public:
 
 	ComPtr<ID3D11Buffer>		mVbSquare;				// 四角形用頂点バッファ
 
+	ComPtr<ID3D11BlendState>	mAlphaBlendState = nullptr;		// アルファブレンド用ブレンドステート
+
 	//=========================================================
 	// 四角形の2D描画
 	// squares_	：四角形の頂点座標配列
@@ -69,6 +72,12 @@ public:
 	// scale_		：頂点座標の拡縮量
 	// center_		：拡縮の中心座標
 	void Scale2D(std::vector<VertexType2D>& vertices_, const DirectX::XMFLOAT2& scale_, const DirectX::XMFLOAT2& center_);
+
+	//=========================================================
+	// ブレンド制御
+	// 有効化すると頂点カラーのアルファ値に基づいて半透明描画される
+	void EnableAlphaBlend();
+	void DisableAlphaBlend();
 
 
 
