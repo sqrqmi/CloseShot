@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Source/DirectX/Texture.h"
+#include "Source/DirectX/Direct3D.h"
 
 //=========================================================
 // GameSystemƒNƒ‰ƒX

@@ -2,6 +2,12 @@
 
 #include "DirectX.h"
 #include "Source/Game/Camera.h"
+#include "Mesh.h"
+
+// 3Dモデルの読み込みに使用するライブラリ
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 class Texture;
 
@@ -69,6 +75,10 @@ public:
 	bool Initialize(HWND hWnd, int width, int height);
 
 	//=========================================================
+	//
+	bool SetupModel(const char* filePath_);
+
+	//=========================================================
 	// 
 	bool SetupTransform(const DirectX::XMMATRIX& worldMatrix_, const DirectX::XMMATRIX& viewMatrix_, const DirectX::XMMATRIX& projectionMatrix_);
 
@@ -134,6 +144,9 @@ private:
 	float NearClipDistance = 0.0f;	// ニアクリップ距離
 	float FarClipDistance = 0.0f;	// ファークリップ距離
 	float Fov = 0.0f;				// 視野角
+
+	Mesh*	Meshes = nullptr;
+	UINT	MeshNum = 0;
 
 public:
 	// インスタンス作成

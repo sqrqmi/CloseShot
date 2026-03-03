@@ -192,6 +192,26 @@ bool Direct3D::Initialize(HWND hWnd, int width, int height)
 }
 
 //=========================================================
+//
+bool Direct3D::SetupModel(const char* filePath_)
+{
+	// ÉÇÉfÉãÇÃì«Ç›çûÇ›
+	Assimp::Importer importer;
+	unsigned int flag = aiProcess_Triangulate;
+	auto pScene = importer.ReadFile(filePath_, flag);
+
+	if (pScene == nullptr)
+	{
+		OutputDebugStringA("ÉÇÉfÉãÇÃì«Ç›çûÇ›Ç…é∏îs\n");
+		return false;
+	}
+
+
+
+	return true;
+}
+
+//=========================================================
 // 
 bool Direct3D::SetupTransform(const DirectX::XMMATRIX& worldMatrix_, const DirectX::XMMATRIX& viewMatrix_, const DirectX::XMMATRIX& projectionMatrix_)
 {
