@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DirectX.h"
+#include "Source/Game/Camera.h"
 
 class Texture;
 
@@ -9,6 +10,26 @@ struct VertexType2D
 {
 	DirectX::XMFLOAT3 Pos;		// 座標
 	DirectX::XMFLOAT4 Color;	// 色
+};
+
+// 定数バッファの構造体
+struct CbTransform
+{
+	DirectX::XMMATRIX World;
+	DirectX::XMMATRIX View;
+	DirectX::XMMATRIX Projection;
+};
+
+// ビュー変換用コンスタントバッファ構造体
+struct CbView
+{
+	DirectX::XMFLOAT4 View;
+};
+
+struct CbViewSet
+{
+	CbView Data;
+	ID3D11Buffer* pBuffer = nullptr;
 };
 
 //================================================
@@ -26,13 +47,6 @@ public:
 	// バックバッファーのRTビュー（バックバッファを描画先として許可をGPUに教えるもの）
 	ComPtr<ID3D11RenderTargetView>	mBackBufferView;
 
-	//=========================================================
-	// Direct3Dを初期化し、使用できるようにする関数
-	// hWnd		：ウィンドウハンドル（ウィンドウそのものを指すIDのようなもの[参照]）
-	// width	：画面の横幅
-	// height	：画面の高さ
-	bool Initialize(HWND hWnd, int width, int height);
-
 	// 2D描画用のシェーダー
 	ComPtr<ID3D11VertexShader>	mSpriteVS = nullptr;	// 頂点シェーダー
 	ComPtr<ID3D11PixelShader>	mSpritePS = nullptr;	// ピクセルシェーダー
@@ -41,6 +55,34 @@ public:
 	ComPtr<ID3D11Buffer>		mVbSquare;				// 四角形用頂点バッファ
 
 	ComPtr<ID3D11BlendState>	mAlphaBlendState = nullptr;		// アルファブレンド用ブレンドステート
+
+	ComPtr<ID3D11Buffer>		mConstantBuffer;				// 定数バッファ
+
+	// 保存用射影行列
+	DirectX::XMMATRIX 	mProjectionMatrix;
+
+	//=========================================================
+	// Direct3Dを初期化し、使用できるようにする関数
+	// hWnd		：ウィンドウハンドル（ウィンドウそのものを指すIDのようなもの[参照]）
+	// width	：画面の横幅
+	// height	：画面の高さ
+	bool Initialize(HWND hWnd, int width, int height);
+
+	//=========================================================
+	// 
+	bool SetupTransform(const DirectX::XMMATRIX& worldMatrix_, const DirectX::XMMATRIX& viewMatrix_, const DirectX::XMMATRIX& projectionMatrix_);
+
+	//=========================================================
+	// 
+	bool SetupProjectionTransform(int width_, int height_);
+
+	//=========================================================
+	// 
+	bool SetupViewTransform(const DirectX::XMMATRIX& viewMatrix_);
+
+	//=========================================================
+	// 
+	bool SetupModelTransform(const DirectX::XMMATRIX& worldMatrix_);
 
 	//=========================================================
 	// 四角形の2D描画
@@ -83,10 +125,15 @@ public:
 
 // シングルトンパターン
 private:
+
 	// 唯一のインスタンス用のポインタ
 	static inline Direct3D* sInstance;
 	// コンストラクタはprivateにする
 	Direct3D() {}
+
+	float NearClipDistance = 0.0f;	// ニアクリップ距離
+	float FarClipDistance = 0.0f;	// ファークリップ距離
+	float Fov = 0.0f;				// 視野角
 
 public:
 	// インスタンス作成

@@ -10,24 +10,35 @@
 // ゲームの初期化処理
 void GameSystem::Initialize()
 {
-	const float ALPHA = 0.5f;
+	const float ALPHA = 1.0f;
 
 	Triangle =
 	{
-		{ DirectX::XMFLOAT3(  0.0f,  sqrtf(3) / 3.f, 0.0f), DirectX::XMFLOAT4( 1.f, 0.f, 0.f, ALPHA )},	// 上
-		{ DirectX::XMFLOAT3(  0.5f, -sqrtf(3) / 6.f, 0.0f), DirectX::XMFLOAT4( 0.f, 1.f, 0.f, ALPHA) },	// 左下
-		{ DirectX::XMFLOAT3( -0.5f, -sqrtf(3) / 6.f, 0.0f), DirectX::XMFLOAT4( 0.f, 0.f, 1.f, ALPHA) },	// 右下
+		{ DirectX::XMFLOAT3(  0.0f,  1.0f, 1.0f ), DirectX::XMFLOAT4( 1.f, 0.f, 0.f, ALPHA ) },	// 上
+		{ DirectX::XMFLOAT3(  1.0f, -1.0f, 1.0f ), DirectX::XMFLOAT4( 0.f, 1.f, 0.f, ALPHA ) },	// 左下
+		{ DirectX::XMFLOAT3( -1.0f, -1.0f, 1.0f ), DirectX::XMFLOAT4( 0.f, 0.f, 1.f, ALPHA ) },	// 右下
 	};
 	
 	// D3D.Transform2D(Triangle, DirectX::XMFLOAT2(0.5f, MoveOffset));
 	// D3D.Scale2D(Triangle, DirectX::XMFLOAT2(2.f, 2.f), DirectX::XMFLOAT2(0.f, 0.f));
 	// D3D.Rotation2D(Triangle, DirectX::XMConvertToRadians(90.f), DirectX::XMFLOAT2(0.f, 0.f));
+
+	// 合成行列の計算
+	WorldMatrix = Scale * Rotation * Translation;
 }
 
 //=========================================================
 // ゲームの更新処理
 void GameSystem::Update()
 {
+	CAM.Update();
+
+	DirectX::XMMATRIX world = WorldMatrix;
+	DirectX::XMMATRIX view = CAM.GetViewMatrix();
+	DirectX::XMMATRIX projection = D3D.mProjectionMatrix;
+
+	D3D.SetupTransform(world, view, projection);
+
 	// 画面を青色で塗りつぶす
 	float color[4] = { 0.2f, 0.2f, 1.0f, 1.0f };
 	D3D.mDeviceContext->ClearRenderTargetView(D3D.mBackBufferView.Get(), color);

@@ -6,6 +6,11 @@
 
 bool Direct3D::Initialize(HWND hWnd, int width, int height)
 {
+	// 変数の初期化
+	NearClipDistance = 0.1f;
+	FarClipDistance = 1000.0f;
+	Fov = DirectX::XMConvertToRadians(30.0f);
+
 	//=========================================================
 	// ファクトリー作成
 	ComPtr<IDXGIFactory> factory;
@@ -166,6 +171,130 @@ bool Direct3D::Initialize(HWND hWnd, int width, int height)
 	float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
 	mDeviceContext->OMSetBlendState(mAlphaBlendState.Get(), blendFactor, 0xffffffff);
 
+	//=========================================================
+	// 定数バッファ作成
+	D3D11_BUFFER_DESC cbDesc = {};
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.ByteWidth = sizeof(CbTransform);
+	cbDesc.Usage = D3D11_USAGE_DEFAULT;
+	cbDesc.CPUAccessFlags = 0;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	if (FAILED(mDevice->CreateBuffer(&cbDesc, nullptr, &mConstantBuffer)))
+	{
+		return false;
+	}
+
+	SetupProjectionTransform(width, height);
+
+	return true;
+}
+
+//=========================================================
+// 
+bool Direct3D::SetupTransform(const DirectX::XMMATRIX& worldMatrix_, const DirectX::XMMATRIX& viewMatrix_, const DirectX::XMMATRIX& projectionMatrix_)
+{
+	if (!mConstantBuffer)
+	{
+		OutputDebugStringA("ConstantBuffer is NULL\n");
+		return false;
+	}
+
+	using namespace DirectX;
+
+	CbTransform cb;
+
+	// 転置して格納（HLSL側に合わせる）
+	cb.World		= XMMatrixTranspose(worldMatrix_);
+	cb.View			= XMMatrixTranspose(viewMatrix_);
+	cb.Projection	= XMMatrixTranspose(projectionMatrix_);
+
+	mDeviceContext->UpdateSubresource(
+		mConstantBuffer.Get(),
+		0,
+		nullptr,
+		&cb,
+		0,
+		0
+	);
+
+	mDeviceContext->VSSetConstantBuffers(
+		0,	// register(b0)
+		1,
+		mConstantBuffer.GetAddressOf()
+	);
+
+	return true;
+}
+
+//=========================================================
+// 
+bool Direct3D::SetupProjectionTransform(int width, int height)
+{
+	mProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(
+		Fov,
+		static_cast<float>(width) / static_cast<float>(height),	// アスペクト比
+		NearClipDistance,
+		FarClipDistance
+	);
+
+	return true;
+}
+
+//=========================================================
+// 
+bool Direct3D::SetupViewTransform(const DirectX::XMMATRIX& viewMatrix_)
+{
+	CbTransform cb;
+
+	// 転置して格納（HLSL側に合わせる）
+	// cb.Transform = DirectX::XMMatrixTranspose(viewMatrix_);
+
+	mDeviceContext->UpdateSubresource(
+		mConstantBuffer.Get(),
+		0,
+		nullptr,
+		&cb,
+		0,
+		0
+	);
+
+	// 頂点シェーダーの 1番 (b1) にセット
+	mDeviceContext->VSSetConstantBuffers(
+		1,	// register(b1)
+		1,
+		mConstantBuffer.GetAddressOf()
+	);
+
+	return true;
+}
+
+//=========================================================
+// 
+bool Direct3D::SetupModelTransform(const DirectX::XMMATRIX& worldMatrix_)
+{
+	CbTransform cb;
+
+	// 転置して格納（HLSL側に合わせる）
+	// cb.Transform = DirectX::XMMatrixTranspose(worldMatrix_);
+
+	mDeviceContext->UpdateSubresource(
+		mConstantBuffer.Get(),
+		0,
+		nullptr,
+		&cb,
+		0,
+		0
+	);
+
+	// 頂点シェーダーの 0番 (b0) にセット
+	mDeviceContext->VSSetConstantBuffers(
+		0,	// register(b0)
+		1,
+		mConstantBuffer.GetAddressOf()
+	);
+
 	return true;
 }
 
@@ -223,6 +352,32 @@ bool Direct3D::Draw2D(std::vector<VertexType2D>& vertices_, int vertexCount_)
 		return false;
 	}
 
+	//// 定数バッファ構造体
+	//CbTransform cb;
+
+	//// 単位行列を作成し、頂点座標はそのまま保持する
+	//DirectX::XMMATRIX matrix = DirectX::XMMatrixIdentity();
+
+	//// 転置して格納（HLSL側に合わせる）
+	//cb.World = DirectX::XMMatrixTranspose(matrix);
+
+	//// 定数バッファに行列データを転送する
+	//mDeviceContext->UpdateSubresource(
+	//	mConstantBuffer.Get(),
+	//	0,
+	//	nullptr,
+	//	&cb,
+	//	0,
+	//	0
+	//);
+
+	// 定数バッファを頂点シェーダーの 0番 (b0) にセット
+	mDeviceContext->VSSetConstantBuffers(
+		0,	// register(b0)
+		1,
+		mConstantBuffer.GetAddressOf()
+	);
+
 	// 描画データをコピーする
 	std::vector<VertexType2D> vertices(vertices_.begin(), vertices_.end());
 
@@ -247,7 +402,7 @@ bool Direct3D::Draw2D(std::vector<VertexType2D>& vertices_, int vertexCount_)
 	mDeviceContext->IASetVertexBuffers(0, 1, mVbSquare.GetAddressOf(), &stride, &offset);
 
 	// プリミティブ・トロポジーをセット
-	mDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	mDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// 2D用頂点シェーダーセット
 	mDeviceContext->VSSetShader(mSpriteVS.Get(), 0, 0);
@@ -296,8 +451,8 @@ void Direct3D::Rotation2D(std::vector<VertexType2D>& vertices_, float angle_, co
 		float rotationY = x * sin + y * cos;
 
 		// 回転後の座標を保存
-		v.Pos.x = rotationX;
-		v.Pos.y = rotationY;
+		v.Pos.x = rotationX + center_.x;
+		v.Pos.y = rotationY + center_.y;
 	}
 }
 
