@@ -1,13 +1,41 @@
 #pragma once
 
 #include "DirectX.h"
+#include "Source/Game/Camera.h"
+#include "Mesh.h"
+
+// 3Dモデルの読み込みに使用するライブラリ
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 class Texture;
 
 // 2D用頂点構造体
 struct VertexType2D
 {
-	DirectX::XMFLOAT3 Pos;	// 座標
+	DirectX::XMFLOAT3 Pos;		// 座標
+	DirectX::XMFLOAT4 Color;	// 色
+};
+
+// 定数バッファの構造体
+struct CbTransform
+{
+	DirectX::XMMATRIX World;
+	DirectX::XMMATRIX View;
+	DirectX::XMMATRIX Projection;
+};
+
+// ビュー変換用コンスタントバッファ構造体
+struct CbView
+{
+	DirectX::XMFLOAT4 View;
+};
+
+struct CbViewSet
+{
+	CbView Data;
+	ID3D11Buffer* pBuffer = nullptr;
 };
 
 //================================================
@@ -25,6 +53,20 @@ public:
 	// バックバッファーのRTビュー（バックバッファを描画先として許可をGPUに教えるもの）
 	ComPtr<ID3D11RenderTargetView>	mBackBufferView;
 
+	// 2D描画用のシェーダー
+	ComPtr<ID3D11VertexShader>	mSpriteVS = nullptr;	// 頂点シェーダー
+	ComPtr<ID3D11PixelShader>	mSpritePS = nullptr;	// ピクセルシェーダー
+	ComPtr<ID3D11InputLayout>	mSpriteInputLayout = nullptr;	// 入力レイアウト
+
+	ComPtr<ID3D11Buffer>		mVbSquare;				// 四角形用頂点バッファ
+
+	ComPtr<ID3D11BlendState>	mAlphaBlendState = nullptr;		// アルファブレンド用ブレンドステート
+
+	ComPtr<ID3D11Buffer>		mConstantBuffer;				// 定数バッファ
+
+	// 保存用射影行列
+	DirectX::XMMATRIX 	mProjectionMatrix;
+
 	//=========================================================
 	// Direct3Dを初期化し、使用できるようにする関数
 	// hWnd		：ウィンドウハンドル（ウィンドウそのものを指すIDのようなもの[参照]）
@@ -32,12 +74,25 @@ public:
 	// height	：画面の高さ
 	bool Initialize(HWND hWnd, int width, int height);
 
-	// 2D描画用のシェーダー
-	ComPtr<ID3D11VertexShader>	mSpriteVS = nullptr;	// 頂点シェーダー
-	ComPtr<ID3D11PixelShader>	mSpritePS = nullptr;	// ピクセルシェーダー
-	ComPtr<ID3D11InputLayout>	mSpriteInputLayout = nullptr;	// 入力レイアウト
+	//=========================================================
+	//
+	bool SetupModel(const char* filePath_);
 
-	ComPtr<ID3D11Buffer>		mVbSquare;				// 四角形用頂点バッファ
+	//=========================================================
+	// 
+	bool SetupTransform(const DirectX::XMMATRIX& worldMatrix_, const DirectX::XMMATRIX& viewMatrix_, const DirectX::XMMATRIX& projectionMatrix_);
+
+	//=========================================================
+	// 
+	bool SetupProjectionTransform(int width_, int height_);
+
+	//=========================================================
+	// 
+	bool SetupViewTransform(const DirectX::XMMATRIX& viewMatrix_);
+
+	//=========================================================
+	// 
+	bool SetupModelTransform(const DirectX::XMMATRIX& worldMatrix_);
 
 	//=========================================================
 	// 四角形の2D描画
@@ -70,14 +125,28 @@ public:
 	// center_		：拡縮の中心座標
 	void Scale2D(std::vector<VertexType2D>& vertices_, const DirectX::XMFLOAT2& scale_, const DirectX::XMFLOAT2& center_);
 
+	//=========================================================
+	// ブレンド制御
+	// 有効化すると頂点カラーのアルファ値に基づいて半透明描画される
+	void EnableAlphaBlend();
+	void DisableAlphaBlend();
+
 
 
 // シングルトンパターン
 private:
+
 	// 唯一のインスタンス用のポインタ
 	static inline Direct3D* sInstance;
 	// コンストラクタはprivateにする
 	Direct3D() {}
+
+	float NearClipDistance = 0.0f;	// ニアクリップ距離
+	float FarClipDistance = 0.0f;	// ファークリップ距離
+	float Fov = 0.0f;				// 視野角
+
+	Mesh*	Meshes = nullptr;
+	UINT	MeshNum = 0;
 
 public:
 	// インスタンス作成

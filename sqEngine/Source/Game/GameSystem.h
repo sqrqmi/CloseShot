@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Source/DirectX/Texture.h"
+#include "Source/DirectX/Direct3D.h"
 
 //=========================================================
 // GameSystemクラス
@@ -28,10 +29,22 @@ private:
 	GameSystem() {};
 
 	// 頂点座標配列
-	std::vector<VertexType2D> Squares;
+	std::vector<VertexType2D> Triangle;
 
 	// 移動量
 	float MoveOffset = 0.01f;
+
+	// 拡大縮小量
+	DirectX::XMMATRIX Scale = DirectX::XMMatrixScaling(2.0f, 2.0f, 2.0f);
+
+	// 回転量
+	DirectX::XMMATRIX Rotation = DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(45.0f));
+
+	// 移動量
+	DirectX::XMMATRIX Translation = DirectX::XMMatrixTranslation(0.5f, 0.f, 0.f);
+
+	// 合成行列
+	DirectX::XMMATRIX WorldMatrix;
 
 public:
 
