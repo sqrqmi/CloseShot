@@ -96,6 +96,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Direct3Dインスタンス削除
     Direct3D::DeleteInstance();
 
+	// カメラインスタンス削除
+	Camera::DeleteInstance();
+
     return (int) msg.wParam;
 }
 
@@ -165,6 +168,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    Direct3D::CreateInstance();
    // Direct3D初期化
    D3D.Initialize(hWnd, 720, 720);
+   // Cameraインスタンス作成
+   Camera::CreateInstance();
+   // カメラ初期化
+   CAM.Initialize();
 
    // ウィンドウのクライアントサイズを設定
    RECT rcWnd, rcClient;

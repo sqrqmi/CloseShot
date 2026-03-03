@@ -1,6 +1,8 @@
-cbuffer cbTransform : register(b0)
+cbuffer Transform : register(b0)
 {
-    matrix Transform;
+    matrix World;
+    matrix View;
+    matrix Projection;
 }
 
 // 頂点シェーダーに入力されるデータ
@@ -32,7 +34,9 @@ VSOutput VS(VSInput input_)
     VSOutput Out;
     
     float4 pos = float4(input_.Pos, 1.0f);
-    Out.Pos = pos;
+    Out.Pos = mul(pos, World);
+    Out.Pos = mul(Out.Pos, View);
+    Out.Pos = mul(Out.Pos, Projection);
     Out.Color = input_.Color;
     
     return Out;
