@@ -45,15 +45,6 @@
     <ClInclude Include="Source\DirectX\DirectX.h">
       <Filter>Source\DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Game\Camera.h">
-      <Filter>Source\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DirectX\Texture.h">
-      <Filter>Source\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DirectX\Mesh.h">
-      <Filter>Source\DirectX</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sqEngine.cpp">
@@ -64,15 +55,6 @@
     </ClCompile>
     <ClCompile Include="Source\Game\GameSystem.cpp">
       <Filter>Source\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Game\Camera.cpp">
-      <Filter>Source\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DirectX\Texture.cpp">
-      <Filter>Source\DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DirectX\Mesh.cpp">
-      <Filter>Source\DirectX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
