@@ -1,5 +1,4 @@
 #include "framework.h"
-#include "Direct3D.h"
 
 #include <locale.h>
 #include <memory>

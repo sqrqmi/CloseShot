@@ -20,4 +20,5 @@ using Microsoft::WRL::ComPtr;
 #include <DirectXTex.h>
 
 // 自作のDirectX関係のヘッダーをインクルード（適宜追記する）
-// #include "Direct3D.h"
+#include "Direct3D.h"
+#include "Texture.h"
